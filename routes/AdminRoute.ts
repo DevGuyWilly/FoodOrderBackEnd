@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
-import { CreateVendor, GetVendor, GetVendorByID } from "../controllers/index";
+import { CreateVendor, GetVendors, GetVendorByID } from "../controllers/index";
 
 const router = express.Router();
 
@@ -10,7 +10,7 @@ router.get("/", (req: Request, res: Response, next: NextFunction) => {
 });
 
 router.post("/vendor", CreateVendor);
-router.get("/vendor", GetVendor);
+router.get("/vendor", GetVendors);
 router.get("/vendor/:id", GetVendorByID);
 
 export { router as AdminRouter };

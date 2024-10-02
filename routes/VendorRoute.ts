@@ -11,12 +11,14 @@ const router = express.Router();
 
 router.get("/", (req: Request, res: Response, next: NextFunction) => {
   res.json({
-    message: "Hello, from Vandor",
+    message: "Hello, from Vendor",
   });
 });
 
 router.post("/login", VendorLogin);
-router.get("/profile", Authenticate, getVendorProfile);
+
+router.use(Authenticate);
+router.get("/profile", getVendorProfile);
 router.patch("/profile", updateVendorProfile);
 router.patch("/service", updateVendorService);
 

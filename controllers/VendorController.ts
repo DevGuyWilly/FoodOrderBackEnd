@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { VendorLoginInputs } from "../dto";
+import { VendorLoginInputs, EditVendorInputs } from "../dto";
 import { FindVendor } from "./AdminController";
 import { generateToken, ValidatePassword } from "../utility";
 
@@ -87,13 +87,70 @@ export const getVendorProfile = async (
   }
 };
 
-export const updateVendorProfile = (
+export const updateVendorProfile = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {};
-export const updateVendorService = (
+) => {
+  const { name, address, foodTypes, phone } = <EditVendorInputs>req.body;
+  const user = req.user;
+
+  try {
+    if (user) {
+      const exisitingVendor = await FindVendor(user._id);
+
+      if (exisitingVendor !== null) {
+        exisitingVendor.name = name;
+        exisitingVendor.address = address;
+        exisitingVendor.foodType = foodTypes;
+        exisitingVendor.phone = phone;
+
+        const saved = await exisitingVendor.save();
+
+        res.status(200).json({
+          status: "Success",
+          updatedUser: saved,
+        });
+        return;
+      }
+    }
+
+    res.json({
+      message: "Vendor not Authorized to perform action....",
+    });
+    return;
+  } catch (error) {
+    res.json(error);
+  }
+};
+export const updateVendorService = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {};
+) => {
+  const user = req.user;
+
+  try {
+    if (user) {
+      const exisitingVendor = await FindVendor(user._id);
+
+      if (exisitingVendor !== null) {
+        exisitingVendor.serviceAvailable = !exisitingVendor.serviceAvailable;
+        const saved = await exisitingVendor.save();
+
+        res.status(200).json({
+          status: "Success",
+          updatedUser: saved,
+        });
+        return;
+      }
+    }
+
+    res.json({
+      message: "Vendor not Authorized to perform action...",
+    });
+    return;
+  } catch (error) {
+    res.json(error);
+  }
+};

@@ -9,7 +9,7 @@ export interface CreateVendorInput {
   email: string;
   salt: string;
   password: string;
-  serviceAvailable: boolean
+  serviceAvailable: boolean;
 }
 
 export interface VendorLoginInputs {

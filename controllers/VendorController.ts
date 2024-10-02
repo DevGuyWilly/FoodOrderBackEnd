@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { VendorLoginInputs, EditVendorInputs } from "../dto";
 import { FindVendor } from "./AdminController";
 import { generateToken, ValidatePassword } from "../utility";
+import { addFoodInputs } from "../dto/index";
+import { Food, Vendor } from "../models";
 
 export const VendorLogin = async (
   req: Request,
@@ -152,5 +154,88 @@ export const updateVendorService = async (
     return;
   } catch (error) {
     res.json(error);
+  }
+};
+
+export const AddFood = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const user = req.user;
+  try {
+    if (user) {
+      const { name, description, category, foodType, price, readyTime } = <
+        addFoodInputs
+      >req.body;
+
+      const vendor = await FindVendor(user._id);
+
+      if (vendor !== null) {
+        const file = req.files as [Express.Multer.File];
+
+        const images = file.map((files: Express.Multer.File) => files.filename);
+
+        const createdFood = await Food.create({
+          vendorId: vendor.id,
+          name: name,
+          description: description,
+          category: category,
+          foodType: foodType,
+          image: ["images"],
+          price: price,
+          readyTime: readyTime,
+          ratings: 0,
+        });
+
+        vendor.foods.push(createdFood);
+
+        const result = await vendor.save();
+
+        res.status(200).json({
+          status: "Success",
+          updatedUser: result,
+        });
+      }
+    }
+    res.json({
+      message: "User not authorized to perform action",
+    });
+    return;
+  } catch (error) {
+    res.json({
+      status: "An error occured",
+      message: error,
+    });
+  }
+};
+
+export const GetFood = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const user = req.user;
+  try {
+    if (user) {
+      const foods = await Food.find({ vendorId: user._id });
+
+      if (foods !== null) {
+        res.status(200).json({
+          status: "Success",
+          foods: foods,
+        });
+        return;
+      }
+    }
+    res.json({
+      message: "User not authorized to perform action",
+    });
+    return;
+  } catch (error) {
+    res.json({
+      status: "An error occured",
+      message: error,
+    });
   }
 };
